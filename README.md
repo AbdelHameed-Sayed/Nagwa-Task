@@ -2,8 +2,8 @@
 
 A small application which about the English "Part of Speech" student test.
 
-In this application, I used express, express-validator, cors for backend, and
-React.js, React-router, redux toolkit, axios, and tailwind for frontend.
+In this application, I used express, express-validator, cors libraries for backend, and
+React.js, React-router, redux toolkit, axios, and tailwind libraries for frontend.
 
 ## Project Screen Shots
 
