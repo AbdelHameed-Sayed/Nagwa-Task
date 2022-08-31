@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom component */
+@layer components {
+  .nextBackButton {
+    @apply bg-transparent hover:bg-orange-500 text-orange-700 font-semibold hover:text-white pt-1 pb-2 border border-orange-500 hover:border-transparent rounded;
+  }
+
+  .submit-tryAgainButton {
+    @apply flex bg-nagwa-green hover:bg-nagwa-green-hover text-white font-bold pt-2 pb-3 px-3 rounded-md shadow-inner;
+  }
+
+  .paragraph {
+    @apply font-bold text-nagwa-blue w-fit mx-auto p-5 drop-shadow-xl mt-16;
+  }
+
+  .startTest-backHomeButton {
+    @apply flex mx-auto mt-10 bg-nagwa-blue hover:bg-nagwa-blue-hover text-white font-bold pt-2 pb-3 px-3 rounded-md shadow-inner;
+  }
+}
