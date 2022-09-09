@@ -22,8 +22,8 @@ const Practice = () => {
   // All answers of the student to all questions:
   let [allAnswers, setAllAnswers] = useState({});
 
-  // To indicate the answer was correct or no, for alert purpose:
-  let [correctAnswer, setCorrectAnswer] = useState();
+  // To indicate the answer was correct or no, for alert and styling purposes:
+  const [IscorrectAnswers, setIsCorrectAnswers] = useState();
 
   // To indicate the index of the question:
   let [index, setIndex] = useState(0);
@@ -32,19 +32,17 @@ const Practice = () => {
   const [showAlertModal, setShowAlertModal] = useState();
 
   // For routing:
-  let navigate = useNavigate();
+  const navigate = useNavigate();
 
   // For storing student rank into redux:
   const dispatch = useDispatch();
 
+  // let studentAnswers;
+
   // fetching questions from data base through API:
   useEffect(() => {
     axiosInstance
-      .get('/words', {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
+      .get('/words')
       .then(response => {
         // To store Questions array in a state in the first render:
         setWords(response.data);
@@ -57,6 +55,20 @@ const Practice = () => {
       });
   }, []);
 
+  // Check student answer is correct or not:
+  useEffect(() => {
+    axiosInstance
+      .post('/words', {
+        studentAnswers: allAnswers,
+      })
+      .then(response => {
+        setIsCorrectAnswers(response.data);
+      })
+      .catch(error => {
+        // console.log(error);
+      });
+  }, [allAnswers]);
+
   // To send finalScore to backend and get the student rank only if all questions were answered:
   useEffect(() => {
     Object.keys(allAnswers).length === 10 &&
@@ -64,9 +76,8 @@ const Practice = () => {
         .post('/rank', {
           // finalScore = (number of correct answers / total number of questions)*100
           finalScore:
-            (Object.values(allAnswers).filter(
-              answer => answer.correctAnswer === true
-            ).length /
+            (IscorrectAnswers.filter(answer => answer.isCorrect === true)
+              .length /
               words.length) *
             100,
         })
@@ -82,7 +93,7 @@ const Practice = () => {
         .catch(error => {
           // console.log(error.response.data.message);
         });
-  }, [allAnswers, dispatch, navigate, words.length]);
+  }, [IscorrectAnswers, allAnswers, dispatch, navigate, words.length]);
 
   // Put choices in array:
   const choices = ['A- adjective', 'B- adverb', 'C- noun', 'D- verb'];
@@ -119,7 +130,7 @@ const Practice = () => {
             </p>
 
             <p className="text-center mx-auto mt-3 mb-5 border-[1px] max-w-[8rem] font-bold text-lg bg-orange-200 rounded-md drop-shadow-sm p-2">
-              {question.word}
+              {question?.word}
             </p>
 
             {
@@ -169,19 +180,12 @@ const Practice = () => {
                 // To remove selected answer from other questions:
                 setSelectedAnswer('');
 
-                // Putting correct answer into state for alert purposing:
-                setCorrectAnswer(
-                  selectedAnswer === words[index]?.pos ? true : false
-                );
-
                 // To add student answers into allAnswers state:
                 setAllAnswers({
                   ...allAnswers,
                   [`Q${index + 1}`]: {
                     selectedAnswer,
-                    // For rank purpose only:
-                    correctAnswer:
-                      selectedAnswer === words[index]?.pos ? true : false,
+                    id: words[index]?.id,
                   },
                 });
 
@@ -256,11 +260,10 @@ const Practice = () => {
                 question === word && !allAnswers[`Q${idx + 1}`]
                   ? 'bg-nagwa-blue text-white'
                   : // To give the green color to the selected and correctly answered question:
-                  allAnswers[`Q${idx + 1}`]?.selectedAnswer === word.pos
+                  IscorrectAnswers && IscorrectAnswers[idx]?.isCorrect
                   ? 'bg-nagwa-green text-white'
                   : // To give the red color to the selected and wrong answered question:
-                  allAnswers[`Q${idx + 1}`] &&
-                    allAnswers[`Q${idx + 1}`]?.selectedAnswer !== word.pos
+                  allAnswers[`Q${idx + 1}`] && !IscorrectAnswers[idx]?.isCorrect
                   ? 'bg-pink-600 text-white'
                   : // To give the gray color to the not selected not answered questions:
                     'bg-gray-300 border-[0.25px] hover:border-nagwa-blue '
@@ -275,7 +278,13 @@ const Practice = () => {
       {
         // Alert modal:
       }
-      {showAlertModal && <Alert correctAnswer={correctAnswer} />}
+      {showAlertModal && (
+        <Alert
+          correctAnswer={
+            IscorrectAnswers[IscorrectAnswers.length - 1]?.isCorrect
+          }
+        />
+      )}
     </Fragment>
   );
 };
